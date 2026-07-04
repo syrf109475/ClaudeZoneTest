@@ -65,6 +65,30 @@ const jsonLd = {
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta name="generator" content={Astro.generator} />
 
+    {/* Homepage default language: follow the browser, fall back to English.
+        Runs before paint on the English root only; an explicit choice wins. */}
+    <script is:inline>
+      (function () {
+        try {
+          var p = location.pathname;
+          if (p !== '/' && p !== '/index.html') return;
+          var stored = null;
+          try {
+            stored = localStorage.getItem('fc-lang');
+          } catch (e) {}
+          var wantZh;
+          if (stored === 'zh' || stored === 'en') {
+            wantZh = stored === 'zh';
+          } else {
+            var primary =
+              (navigator.languages && navigator.languages[0]) || navigator.language || '';
+            wantZh = /^zh/i.test(primary);
+          }
+          if (wantZh) location.replace('/zh/');
+        } catch (e) {}
+      })();
+    </script>
+
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
@@ -552,8 +576,56 @@ const jsonLd = {
       }
 
       /* ---------- big scan button ---------- */
-      .scan-btn {
+      .scan-actions {
         margin-top: 18px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+      }
+      .scan-save {
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        padding: 13px 22px;
+        border-radius: 999px;
+        border: 1px solid var(--border-strong);
+        background: var(--surface);
+        color: var(--text);
+        font: inherit;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition:
+          background 0.18s,
+          color 0.18s,
+          border-color 0.18s,
+          transform 0.12s;
+      }
+      .scan-save[hidden] {
+        display: none;
+      }
+      .scan-save:hover {
+        background: var(--text);
+        border-color: var(--text);
+        color: #fff;
+        transform: translateY(-1px);
+      }
+      .scan-save:active {
+        transform: scale(0.97);
+      }
+      .scan-save.is-copied {
+        background: var(--low);
+        border-color: var(--low);
+        color: #fff;
+      }
+      .scan-save svg {
+        width: 17px;
+        height: 17px;
+        flex: none;
+      }
+      .scan-btn {
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -672,6 +744,156 @@ const jsonLd = {
         to {
           opacity: 1;
           transform: none;
+        }
+      }
+
+      /* ---------- share ---------- */
+      .share {
+        margin: 18px auto 0;
+        padding-top: 16px;
+        border-top: 1px dashed var(--border-strong);
+        max-width: 640px;
+      }
+      .share__label {
+        display: block;
+        margin-bottom: 12px;
+        font-size: 0.82rem;
+        font-weight: 650;
+        color: var(--muted);
+      }
+      .share__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+      }
+      .share__btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 9px 16px;
+        border-radius: 999px;
+        border: 1px solid var(--border-strong);
+        background: var(--surface);
+        color: var(--text);
+        font: inherit;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition:
+          background 0.18s,
+          color 0.18s,
+          border-color 0.18s,
+          transform 0.12s;
+      }
+      /* `display` on .share__btn would otherwise beat the UA [hidden] rule,
+         leaving native-share / save buttons visible where unsupported. */
+      .share__btn[hidden] {
+        display: none;
+      }
+      .share__btn:hover {
+        text-decoration: none;
+        transform: translateY(-1px);
+      }
+      .share__btn:active {
+        transform: scale(0.97);
+      }
+      .share__btn svg {
+        width: 16px;
+        height: 16px;
+        flex: none;
+      }
+      .share__btn--native {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #fff;
+      }
+      .share__btn--native:hover {
+        background: var(--accent-strong);
+        border-color: var(--accent-strong);
+      }
+      .share__btn--copy:hover {
+        background: var(--text);
+        border-color: var(--text);
+        color: #fff;
+      }
+      .share__btn--copy.is-copied {
+        background: var(--low);
+        border-color: var(--low);
+        color: #fff;
+      }
+
+      .share__platforms {
+        margin-top: 12px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+      }
+      .share__ico {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: 1px solid var(--border-strong);
+        background: var(--surface);
+        color: var(--text);
+        cursor: pointer;
+        transition:
+          background 0.18s,
+          color 0.18s,
+          border-color 0.18s,
+          transform 0.12s;
+      }
+      .share__ico:hover {
+        transform: translateY(-2px);
+        color: #fff;
+        text-decoration: none;
+      }
+      .share__ico:active {
+        transform: scale(0.94);
+      }
+      .share__ico svg {
+        width: 20px;
+        height: 20px;
+        flex: none;
+      }
+      .share__ico--x:hover {
+        background: #000;
+        border-color: #000;
+      }
+      .share__ico--weibo:hover {
+        background: #e6162d;
+        border-color: #e6162d;
+      }
+      .share__ico--telegram:hover {
+        background: #26a5e4;
+        border-color: #26a5e4;
+      }
+      .share__ico--facebook:hover {
+        background: #1877f2;
+        border-color: #1877f2;
+      }
+      .share__ico--linkedin:hover {
+        background: #0a66c2;
+        border-color: #0a66c2;
+      }
+      .share__ico--reddit:hover {
+        background: #ff4500;
+        border-color: #ff4500;
+      }
+      @media (max-width: 560px) {
+        .share__btn {
+          padding: 8px 13px;
+        }
+        .share__platforms {
+          gap: 9px;
+        }
+        .share__ico {
+          width: 42px;
+          height: 42px;
         }
       }
 
@@ -984,7 +1206,13 @@ const jsonLd = {
         .scan-row__value {
           max-width: 24vw;
         }
-        .scan-btn {
+        .scan-actions {
+          flex-direction: column;
+          align-items: stretch;
+          gap: 10px;
+        }
+        .scan-btn,
+        .scan-save {
           width: 100%;
         }
       }

@@ -13,6 +13,7 @@ const { lang } = Astro.props;
       <a
         href={localePath(code)}
         hreflang={code === 'zh' ? 'zh-CN' : 'en'}
+        data-lang={code}
         aria-current={code === lang ? 'page' : undefined}
       >
         {label}

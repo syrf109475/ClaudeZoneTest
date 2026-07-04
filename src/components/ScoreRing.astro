@@ -31,12 +31,26 @@ const circ = 2 * Math.PI * r;
   <span class="risk-badge" id="risk-badge">{t('scan.ready')}</span>
   <p class="risk-desc" id="risk-desc"></p>
 
-  <button class="scan-btn" id="retest" type="button">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <path d="M21 12a9 9 0 1 1-2.64-6.36M21 4v4h-4"></path>
-    </svg>
-    <span id="retest-label">{t('ui.start')}</span>
-  </button>
+  <div class="scan-actions">
+    <button class="scan-btn" id="retest" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 12a9 9 0 1 1-2.64-6.36M21 4v4h-4"></path>
+      </svg>
+      <span id="retest-label">{t('ui.start')}</span>
+    </button>
+    <button
+      class="scan-save"
+      id="share-save"
+      type="button"
+      hidden
+      data-share="save"
+      data-ga-event="share_click"
+      data-ga-id="save"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M7 10l5 5 5-5"></path><path d="M12 15V3"></path></svg>
+      <span id="share-save-label">{t('share.save')}</span>
+    </button>
+  </div>
 
   <ul class="trust">
     <li>{t('hero.badge.local')}</li>
