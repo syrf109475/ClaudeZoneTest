@@ -3,6 +3,8 @@ import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import vercel from '@astrojs/vercel';
 
+import cloudflare from '@astrojs/cloudflare';
+
 // `site` must match the real deployment origin so canonical URLs,
 // hreflang links and the generated sitemap point to the correct domain.
 //
@@ -13,7 +15,7 @@ import vercel from '@astrojs/vercel';
 export default defineConfig({
   site: 'https://claudezonetest.cfwap.syrf109475.top',
   output: 'static',
-  adapter: vercel(),
+  adapter: cloudflare(),
   i18n: {
     locales: ['en', 'zh'],
     defaultLocale: 'en',
