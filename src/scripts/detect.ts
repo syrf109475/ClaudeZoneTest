@@ -4,9 +4,10 @@
  * been checked it shows a verdict plus the list of matched signals.
  * Everything runs locally in the browser.
  */
-import { SIGNALS, riskBand, signalVerdict, type SignalDef } from '../config/signals';
+import { SIGNALS, riskBand, signalVerdict, type SignalDef, type RiskBand } from '../config/signals';
 import { CN_MODELS } from '../config/cn-models';
 import { useTranslations, type Lang } from '../i18n/ui';
+import { renderResultCard, type CardHit } from './share-card';
 
 /**
  * High-risk consolation links — "But you still have Kimi Code, DeepSeek and GLM".
@@ -72,6 +73,11 @@ function resetUI() {
 
   const result = q('#result');
   if (result) result.hidden = true;
+  const share = q('#share');
+  if (share) share.hidden = true;
+  const save = q('#share-save');
+  if (save) save.hidden = true;
+  resetCard();
 
   for (const s of SIGNALS) {
     const row = q(`[data-signal="${s.id}"]`);
@@ -141,8 +147,228 @@ function finalize(total: number, hits: Hit[]) {
       hitsBox?.appendChild(chip);
     }
   }
+
+  const cardHits: CardHit[] = hits.map(({ signal, contribution }) => ({
+    name: t(`signal.${signal.id}.name`),
+    contribution,
+    verdict: signalVerdict(contribution / signal.weight),
+  }));
+
+  updateShare(total, band);
+  void buildCard(total, band, cardHits);
+
   const result = q('#result');
   if (result) result.hidden = false;
+}
+
+/**
+ * One-click sharing of the result. The message is rebuilt on every scan so it
+ * always carries the latest score + verdict, then wired to native sharing
+ * (Web Share API — the "adapt to clients" path that pops the OS/app share
+ * sheet on mobile) and to per-platform web share links as a fallback.
+ */
+interface SharePayload {
+  text: string;
+  url: string;
+}
+let sharePayload: SharePayload = { text: '', url: '' };
+
+type ShareData = { title?: string; text?: string; url?: string; files?: File[] };
+const nav = navigator as Navigator & {
+  share?: (data: ShareData) => Promise<void>;
+  canShare?: (data: ShareData) => boolean;
+};
+
+const CARD_FILENAME = 'fuck-claude-result.png';
+let cardBlob: Blob | null = null;
+
+function resetCard() {
+  cardBlob = null;
+}
+
+/** Render the shareable result image off the current scan (async, non-blocking). */
+async function buildCard(total: number, band: RiskBand, hits: CardHit[]) {
+  try {
+    const blob = await renderResultCard({
+      lang: currentLang(),
+      title: t('hero.title'),
+      score: total,
+      band,
+      bandTitle: t(`band.${band}.title`),
+      bandDesc: t(`band.${band}.desc`),
+      outOf: t('hero.scoreOutOf'),
+      hits,
+      url: pageShareUrl(),
+      brand: 'Fuck Claude',
+    });
+    cardBlob = blob;
+    const save = q<HTMLButtonElement>('#share-save');
+    if (save && blob) save.hidden = false;
+  } catch {
+    cardBlob = null;
+  }
+}
+
+function cardFile(): File | null {
+  return cardBlob ? new File([cardBlob], CARD_FILENAME, { type: 'image/png' }) : null;
+}
+
+function pageShareUrl(): string {
+  try {
+    const u = new URL(window.location.href);
+    u.hash = '';
+    u.search = '';
+    return u.toString();
+  } catch {
+    return window.location.href;
+  }
+}
+
+function shareCaption(): string {
+  return `${sharePayload.text} ${sharePayload.url}`.trim();
+}
+
+function updateShare(total: number, band: RiskBand) {
+  const verdict = t(`band.${band}.title`);
+  const text = t('share.text').replace('{score}', String(total)).replace('{verdict}', verdict);
+  const url = pageShareUrl();
+  sharePayload = { text, url };
+
+  const enc = encodeURIComponent;
+  const links: Record<string, string> = {
+    x: `https://twitter.com/intent/tweet?text=${enc(text)}&url=${enc(url)}`,
+    weibo: `https://service.weibo.com/share/share.php?url=${enc(url)}&title=${enc(text)}`,
+    telegram: `https://t.me/share/url?url=${enc(url)}&text=${enc(text)}`,
+    facebook: `https://www.facebook.com/sharer/sharer.php?u=${enc(url)}`,
+    linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${enc(url)}`,
+    reddit: `https://www.reddit.com/submit?url=${enc(url)}&title=${enc(text)}`,
+  };
+  for (const key of Object.keys(links)) {
+    const a = q<HTMLAnchorElement>(`[data-share="${key}"]`);
+    if (a) a.href = links[key];
+  }
+
+  const native = q<HTMLButtonElement>('#share-native');
+  if (native && typeof nav.share === 'function') native.hidden = false;
+
+  const share = q('#share');
+  if (share) share.hidden = false;
+}
+
+function fallbackCopy(textToCopy: string): boolean {
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = textToCopy;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    return ok;
+  } catch {
+    return false;
+  }
+}
+
+async function copyText(text: string): Promise<boolean> {
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch {
+    /* fall through to the execCommand fallback */
+  }
+  return fallbackCopy(text);
+}
+
+/** Flash a button into its confirmed state, then restore the idle label. */
+function flashCopied(btn: HTMLElement, label: Element | null, idle: string, flashText = t('share.copied')) {
+  btn.classList.add('is-copied');
+  if (label) label.textContent = flashText;
+  setTimeout(() => {
+    btn.classList.remove('is-copied');
+    if (label) label.textContent = idle;
+  }, 1600);
+}
+
+/** Native share sheet, attaching the result image when the platform allows it. */
+async function nativeShare(): Promise<boolean> {
+  if (typeof nav.share !== 'function') return false;
+  const file = cardFile();
+  try {
+    if (file && typeof nav.canShare === 'function' && nav.canShare({ files: [file] })) {
+      await nav.share({ text: sharePayload.text, url: sharePayload.url, files: [file] });
+    } else {
+      await nav.share({ text: sharePayload.text, url: sharePayload.url });
+    }
+    return true;
+  } catch {
+    return false; // user dismissed or the platform refused
+  }
+}
+
+function saveImage(): boolean {
+  if (!cardBlob) return false;
+  try {
+    const url = URL.createObjectURL(cardBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = CARD_FILENAME;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function initShare() {
+  q<HTMLButtonElement>('#share-native')?.addEventListener('click', () => {
+    void nativeShare();
+  });
+
+  const copy = q<HTMLButtonElement>('#share-copy');
+  const copyLabel = q('#share-copy-label');
+  const copyIdle = copyLabel?.textContent ?? t('share.copy');
+  copy?.addEventListener('click', async () => {
+    if (await copyText(shareCaption())) flashCopied(copy, copyLabel, copyIdle);
+  });
+
+  const save = q<HTMLButtonElement>('#share-save');
+  const saveLabel = q('#share-save-label');
+  const saveIdle = saveLabel?.textContent ?? t('share.save');
+  save?.addEventListener('click', () => {
+    if (saveImage()) flashCopied(save, saveLabel, saveIdle, t('share.saved'));
+  });
+}
+
+/** Remember an explicit language choice so the homepage auto-detect respects it. */
+function initLangMemory() {
+  for (const a of document.querySelectorAll<HTMLAnchorElement>('.lang-toggle a[data-lang]')) {
+    a.addEventListener('click', () => {
+      try {
+        localStorage.setItem('fc-lang', a.dataset.lang || '');
+      } catch {
+        /* localStorage unavailable (private mode) — auto-detect still works */
+      }
+    });
+  }
+}
+
+/** Copy-to-clipboard for the default curl command shown in the API section. */
+function initApiCopy() {
+  const btn = q<HTMLButtonElement>('#api-copy');
+  const label = q('#api-copy-label');
+  const idle = label?.textContent ?? t('share.copy');
+  btn?.addEventListener('click', async () => {
+    const text = btn.dataset.copy?.trim() ?? '';
+    if (text && (await copyText(text))) flashCopied(btn, label, idle);
+  });
 }
 
 let running = false;
@@ -206,6 +432,9 @@ async function run() {
  */
 function init() {
   q('#retest')?.addEventListener('click', () => run());
+  initShare();
+  initApiCopy();
+  initLangMemory();
 }
 
 if (document.readyState === 'loading') {

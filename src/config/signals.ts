@@ -32,7 +32,7 @@ export interface SignalDef {
   detect: () => DetectOutcome;
 }
 
-const CN_TIMEZONES = [
+export const CN_TIMEZONES = [
   'Asia/Shanghai',
   'Asia/Urumqi',
   'Asia/Chongqing',
@@ -40,8 +40,8 @@ const CN_TIMEZONES = [
   'Asia/Harbin',
   'Asia/Kashgar',
 ];
-const CLAUDE_TIMEZONES = ['Asia/Shanghai', 'Asia/Urumqi'];
-const GREATER_CN_TIMEZONES = ['Asia/Hong_Kong', 'Asia/Macau', 'Asia/Taipei'];
+export const CLAUDE_TIMEZONES = ['Asia/Shanghai', 'Asia/Urumqi'];
+export const GREATER_CN_TIMEZONES = ['Asia/Hong_Kong', 'Asia/Macau', 'Asia/Taipei'];
 
 const FONTS_SC = [
   'Microsoft YaHei',
@@ -83,12 +83,16 @@ function getTimezone(): string {
   }
 }
 
+/** Pure timezone scoring, reused server-side against the Vercel geo timezone. */
+export function scoreTimezone(tz: string): number {
+  if (CLAUDE_TIMEZONES.includes(tz) || CN_TIMEZONES.includes(tz)) return 1;
+  if (GREATER_CN_TIMEZONES.includes(tz)) return 0.6;
+  return 0;
+}
+
 function detectTimezone(): DetectOutcome {
   const tz = getTimezone();
-  let score = 0;
-  if (CLAUDE_TIMEZONES.includes(tz) || CN_TIMEZONES.includes(tz)) score = 1;
-  else if (GREATER_CN_TIMEZONES.includes(tz)) score = 0.6;
-  return { raw: tz || 'unknown', score };
+  return { raw: tz || 'unknown', score: scoreTimezone(tz) };
 }
 
 function detectTimezoneOffset(): DetectOutcome {
@@ -107,18 +111,23 @@ function normLangs(): string[] {
   return list.map((l) => (l || '').toLowerCase());
 }
 
-function detectLanguage(): DetectOutcome {
-  const langs = normLangs();
-  const primary = langs[0] || '';
-  let score = 0;
+/** Pure language scoring, reused server-side against the Accept-Language header. */
+export function scoreLanguages(langs: string[]): number {
+  const list = langs.map((l) => (l || '').toLowerCase());
+  const primary = list[0] || '';
   const isHansCN = (l: string) => l.startsWith('zh-cn') || l.includes('hans') || l === 'zh';
   const isHant = (l: string) =>
     l.startsWith('zh-tw') || l.startsWith('zh-hk') || l.startsWith('zh-mo') || l.includes('hant');
-  if (isHansCN(primary)) score = 1;
-  else if (isHant(primary)) score = 0.5;
-  else if (langs.some(isHansCN)) score = 0.7;
-  else if (langs.some((l) => l.startsWith('zh'))) score = 0.4;
-  return { raw: langs.join(', ') || 'unknown', score };
+  if (isHansCN(primary)) return 1;
+  if (isHant(primary)) return 0.5;
+  if (list.some(isHansCN)) return 0.7;
+  if (list.some((l) => l.startsWith('zh'))) return 0.4;
+  return 0;
+}
+
+function detectLanguage(): DetectOutcome {
+  const langs = normLangs();
+  return { raw: langs.join(', ') || 'unknown', score: scoreLanguages(langs) };
 }
 
 function detectIntlLocale(): DetectOutcome {
@@ -165,17 +174,16 @@ function detectFonts(): DetectOutcome {
   return { raw, score };
 }
 
-function detectEmoji(): DetectOutcome {
-  const ua = (navigator.userAgent || '').toLowerCase();
-  const platform = (navigator.platform || '').toLowerCase();
-  const probe = `${platform} ${ua}`;
+/** Pure emoji-vendor guess, reused server-side against the User-Agent header. */
+export function scoreEmojiVendor(probe: string): { vendor: string; score: number } {
+  const p = probe.toLowerCase();
 
   let vendor = 'Unknown';
-  if (/iphone|ipad|ipod|mac/.test(probe)) vendor = 'Apple';
-  else if (/android/.test(probe)) vendor = 'Google';
-  else if (/win/.test(probe)) vendor = 'Microsoft';
-  else if (/cros/.test(probe)) vendor = 'Google';
-  else if (/linux/.test(probe)) vendor = 'Linux / Other';
+  if (/iphone|ipad|ipod|mac/.test(p)) vendor = 'Apple';
+  else if (/android/.test(p)) vendor = 'Google';
+  else if (/win/.test(p)) vendor = 'Microsoft';
+  else if (/cros/.test(p)) vendor = 'Google';
+  else if (/linux/.test(p)) vendor = 'Linux / Other';
 
   const vendorScore: Record<string, number> = {
     Apple: 0.25,
@@ -185,7 +193,14 @@ function detectEmoji(): DetectOutcome {
     Unknown: 0.4,
   };
 
-  return { raw: `${vendor} style`, score: vendorScore[vendor] ?? 0.4 };
+  return { vendor, score: vendorScore[vendor] ?? 0.4 };
+}
+
+function detectEmoji(): DetectOutcome {
+  const ua = (navigator.userAgent || '').toLowerCase();
+  const platform = (navigator.platform || '').toLowerCase();
+  const { vendor, score } = scoreEmojiVendor(`${platform} ${ua}`);
+  return { raw: `${vendor} style`, score };
 }
 
 const ICON = {

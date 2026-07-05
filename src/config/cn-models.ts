@@ -20,7 +20,7 @@ export const CN_MODELS: CnModel[] = [
   {
     id: 'glm',
     name: 'GLM',
-    url: 'https://bigmodel.cn/claude-code-plan?utm_source=fuck-claude',
+    url: 'https://bigmodel.cn/?utm_source=fuck-claude',
   },
   {
     id: 'kimi',

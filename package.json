@@ -4,6 +4,13 @@
   "version": "0.1.0",
   "private": true,
   "description": "Check which parts of your browser environment could get you flagged as a China user by Claude Code.",
+  "license": "MIT",
+  "author": "LinXiaoTao",
+  "homepage": "https://github.com/LinXiaoTao/FuckClaude",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LinXiaoTao/FuckClaude.git"
+  },
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
@@ -12,6 +19,7 @@
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.3",
+    "@astrojs/vercel": "^11.0.2",
     "astro": "^7.0.5"
   },
   "pnpm": {

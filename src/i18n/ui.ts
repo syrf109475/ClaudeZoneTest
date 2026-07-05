@@ -95,6 +95,31 @@ export const ui = {
 
     'footer.disclaimer':
       'For reference only, based on public reverse-engineering reports. Not an official statement or advice.',
+    'footer.license':
+      'Open sourced under the MIT License — redistributions must keep the original project notice.',
+    'footer.repo': 'Original project',
+
+    'share.label': 'Share your result',
+    'share.native': 'Share',
+    'share.copy': 'Copy link',
+    'share.copied': 'Copied!',
+    'share.save': 'Save result image',
+    'share.saved': 'Saved!',
+    'share.text':
+      'I scored {score}/100 on the “Am I a Claude China User?” test — {verdict}! 🐶 Check yours:',
+    'share.to.x': 'Share on X',
+    'share.to.weibo': 'Share on Weibo',
+    'share.to.telegram': 'Share on Telegram',
+    'share.to.facebook': 'Share on Facebook',
+    'share.to.linkedin': 'Share on LinkedIn',
+    'share.to.reddit': 'Share on Reddit',
+
+    'api.title': 'Also available over curl',
+    'api.desc':
+      'Prefer the terminal? Hit the endpoint below — it estimates your risk from your IP geo + request headers, and replies in the language of your Accept-Language header.',
+    'api.ex1': '# Text report — follows your Accept-Language',
+    'api.ex2': '# Force a language via header',
+    'api.ex3': '# JSON output',
 
     'ui.claudeBadge': 'Claude Same',
     'ui.retest': 'Scan again',
@@ -179,6 +204,29 @@ export const ui = {
       '所有检测都在你的浏览器本地完成,扫描结果不会离开你的设备。网站仅加载 Google Analytics 统计匿名页面访问量,检测到的信号不会被发送。',
 
     'footer.disclaimer': '本工具仅供参考,基于公开逆向分析,不构成任何官方结论或建议。',
+    'footer.license': '基于 MIT 协议开源 —— 二次发布请保留原项目署名。',
+    'footer.repo': 'GitHub 原项目',
+
+    'share.label': '分享你的结果',
+    'share.native': '分享',
+    'share.copy': '复制链接',
+    'share.copied': '已复制！',
+    'share.save': '保存结果图片',
+    'share.saved': '已保存！',
+    'share.text': '我在「你是 Claude 中国用户吗」测试里得了 {score}/100 —— {verdict}！🐶 快来测测你的:',
+    'share.to.x': '分享到 X',
+    'share.to.weibo': '分享到微博',
+    'share.to.telegram': '分享到 Telegram',
+    'share.to.facebook': '分享到 Facebook',
+    'share.to.linkedin': '分享到 LinkedIn',
+    'share.to.reddit': '分享到 Reddit',
+
+    'api.title': '也支持 curl 命令行',
+    'api.desc':
+      '喜欢终端?请求下面的接口 —— 它会根据你的 IP 归属地 + 请求头估算风险,并按你的 Accept-Language 请求头返回对应语言。',
+    'api.ex1': '# 文本报告 —— 跟随 Accept-Language',
+    'api.ex2': '# 通过请求头指定语言',
+    'api.ex3': '# JSON 输出',
 
     'ui.claudeBadge': 'Claude 同款',
     'ui.retest': '重新扫描',
