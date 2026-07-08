@@ -1,0 +1,158 @@
+---
+/**
+ * Header social icons (Xiaohongshu / Douyin / X) next to the GitHub link.
+ * Every icon is a normal click-through link; on hover-capable devices a
+ * popover shows a QR code so all three profiles can also be followed by
+ * scanning with the matching app. QR SVGs are generated at build time with
+ * the `qrcode` package — zero client JS, zero network requests.
+ */
+import QRCode from 'qrcode';
+import { SOCIALS } from '../config/socials';
+import { useTranslations, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const items = await Promise.all(
+  SOCIALS.map(async (s) => ({
+    ...s,
+    qrSvg: await QRCode.toString(s.qr, {
+      type: 'svg',
+      errorCorrectionLevel: 'M',
+      margin: 2,
+      color: { dark: '#1f1e1d', light: '#ffffff' },
+    }),
+  })),
+);
+---
+
+<ul class="socials">
+  {
+    items.map((s) => (
+      <li class="social" style={`--brand: ${s.color}`}>
+        <a
+          class="icon-link social__link"
+          href={s.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={t(`social.${s.id}`)}
+          data-ga-event="social_click"
+          data-ga-id={s.id}
+        >
+          <svg
+            width={s.iconSize?.w ?? 20}
+            height={s.iconSize?.h ?? 20}
+            viewBox={s.viewBox ?? '0 0 24 24'}
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path d={s.iconPath} />
+          </svg>
+        </a>
+        <div class="social__pop" role="tooltip">
+          <span class="social__qr" set:html={s.qrSvg} />
+          <span class="social__name">{t(`social.${s.id}`)}</span>
+          <span class="social__hint">{t('social.scan')}</span>
+        </div>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .socials {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .social {
+    position: relative;
+    display: inline-flex;
+  }
+  /* Extra .social raises specificity over the shared .icon-link:hover rule. */
+  .social .social__link:hover {
+    color: var(--brand);
+    border-color: var(--brand);
+  }
+
+  .social__pop {
+    position: absolute;
+    top: calc(100% + 12px);
+    right: -8px;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 12px 12px 10px;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-top: 3px solid var(--brand);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-md);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-4px);
+    transition:
+      opacity 0.18s,
+      transform 0.18s,
+      visibility 0.18s;
+    pointer-events: none;
+  }
+  /* Hover bridge so the popover doesn't flicker between icon and card. */
+  .social__pop::before {
+    content: '';
+    position: absolute;
+    top: -15px;
+    left: 0;
+    right: 0;
+    height: 15px;
+  }
+  .social__qr {
+    display: block;
+    width: 132px;
+    height: 132px;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .social__qr :global(svg) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .social__name {
+    margin-top: 6px;
+    font-size: 0.8rem;
+    font-weight: 650;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .social__hint {
+    font-size: 0.7rem;
+    color: var(--muted-2);
+    white-space: nowrap;
+  }
+
+  /* QR popover only where hovering exists; touch users just tap through. */
+  @media (hover: hover) and (pointer: fine) {
+    .social:hover .social__pop,
+    .social__link:focus-visible + .social__pop {
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+      pointer-events: auto;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .socials {
+      gap: 6px;
+    }
+  }
+</style>

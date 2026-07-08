@@ -13,6 +13,11 @@ export interface CnModel {
 
 export const CN_MODELS: CnModel[] = [
   {
+    id: 'kimi',
+    name: 'Kimi',
+    url: 'https://www.kimi.com/code?utm_source=fuck-claude',
+  },
+  {
     id: 'deepseek',
     name: 'DeepSeek',
     url: 'https://www.deepseek.com/?utm_source=fuck-claude',
@@ -21,10 +26,5 @@ export const CN_MODELS: CnModel[] = [
     id: 'glm',
     name: 'GLM',
     url: 'https://bigmodel.cn/?utm_source=fuck-claude',
-  },
-  {
-    id: 'kimi',
-    name: 'Kimi',
-    url: 'https://www.kimi.com/code?utm_source=fuck-claude',
   },
 ];

@@ -46,6 +46,9 @@ const jsonLd = {
         t('signal.timezone.name'),
         t('signal.language.name'),
         t('signal.fonts.name'),
+        t('signal.vendorFonts.name'),
+        t('signal.cnBrowser.name'),
+        t('signal.deviceVendor.name'),
         t('signal.intlLocale.name'),
         t('signal.timezoneOffset.name'),
         t('signal.emoji.name'),
@@ -252,6 +255,7 @@ const jsonLd = {
       .lang-toggle a {
         padding: 5px 12px;
         color: var(--muted);
+        white-space: nowrap;
       }
       .lang-toggle a:hover {
         text-decoration: none;
@@ -262,12 +266,48 @@ const jsonLd = {
         color: #fff;
         font-weight: 650;
       }
+      /* Bordered icon buttons — one shared style for GitHub + social icons. */
       .icon-link {
         display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 34px;
+        height: 34px;
+        padding: 0 6px;
+        border: 1px solid var(--border-strong);
+        border-radius: 999px;
+        background: var(--surface);
         color: var(--muted);
+        transition:
+          color 0.18s,
+          border-color 0.18s,
+          transform 0.12s;
       }
       .icon-link:hover {
         color: var(--text);
+        border-color: currentColor;
+        transform: translateY(-1px);
+        text-decoration: none;
+      }
+      .icon-link:active {
+        transform: scale(0.95);
+      }
+      @media (max-width: 560px) {
+        .nav__inner {
+          gap: 8px;
+          padding: 0 14px;
+        }
+        .nav__actions {
+          gap: 6px;
+        }
+        .lang-toggle a {
+          padding: 4px 7px;
+        }
+        .icon-link {
+          min-width: 28px;
+          height: 28px;
+          padding: 0 4px;
+        }
       }
 
       /* ---------- sponsors ---------- */

@@ -51,6 +51,15 @@ export const ui = {
     'signal.fonts.name': 'Installed Chinese fonts',
     'signal.fonts.desc':
       'Canvas width-probing for Simplified / Traditional Chinese fonts such as Microsoft YaHei and PingFang SC.',
+    'signal.vendorFonts.name': 'Chinese vendor fonts',
+    'signal.vendorFonts.desc':
+      'Canvas probing for fonts shipped by Chinese vendors or software — MiSans, HarmonyOS Sans, OPPO Sans, WPS Founder faces. Any hit is a strong tell.',
+    'signal.cnBrowser.name': 'Chinese browser / WebView',
+    'signal.cnBrowser.desc':
+      'User agent and UA-CH brands matched against WeChat, QQ, Quark, UC, Baidu and other Chinese browsers or in-app WebViews.',
+    'signal.deviceVendor.name': 'Chinese-brand device',
+    'signal.deviceVendor.desc':
+      'UA-CH device model (navigator.userAgentData) and UA matched against HarmonyOS, Huawei, Xiaomi, OPPO, vivo and other Chinese brands.',
     'signal.intlLocale.name': 'Intl locale',
     'signal.intlLocale.desc':
       'The locale your browser resolves for date and number formatting.',
@@ -66,13 +75,13 @@ export const ui = {
     'result.noHits': 'No strong China signals matched. Low risk.',
 
     'signals.title': 'What gets scanned',
-    'signals.sub': 'Six locale fingerprints, weighted to a 0–100 risk score.',
+    'signals.sub': 'Nine locale fingerprints, weighted to a 0–100 risk score.',
 
     'how.title': 'How the check works',
     'how.p1':
       'When Claude Code is pointed at a proxy endpoint via ANTHROPIC_BASE_URL, public reverse-engineering reports found it reads your operating-system timezone and the proxy hostname, then hides the verdict inside the system prompt with Unicode steganography — the date separator and four look-alike apostrophes in the “Today’s date” line encode whether you look like a China user.',
     'how.p2':
-      'A web page cannot read everything Claude Code can, but the key signal is identical: this tool reads the same OS timezone, then adds five more browser-visible locale fingerprints — UI language, installed Chinese fonts, Intl locale, UTC+8 offset and emoji style — into a weighted score. Signals scoring ≥0.25 count as hits; bands are Low 0–30, Medium 31–60, High 61–100.',
+      'A web page cannot read everything Claude Code can, but the key signal is identical: this tool reads the same OS timezone, then adds eight more browser-visible fingerprints — UI language, Chinese fonts, Chinese vendor fonts, Chinese browsers, device brand, Intl locale, UTC+8 offset and emoji style — into a weighted score. Signals scoring ≥0.25 count as hits; bands are Low 0–30, Medium 31–60, High 61–100.',
     'ui.weight': 'Weight',
 
     'faq.title': 'FAQ',
@@ -81,7 +90,7 @@ export const ui = {
       'According to public reverse-engineering reports, when Claude Code talks to a non-official endpoint it reads the OS timezone and proxy hostname, and steganographically encodes the result into its system prompt. The timezone this page reads via Intl.DateTimeFormat is the very same OS timezone.',
     'faq.q2': 'Is this score the exact check Claude runs?',
     'faq.a2':
-      'No. Only the system timezone maps one-to-one onto Claude’s reported mechanism. The other five signals are common Chinese-environment fingerprints that correlate with it, so treat the score as an estimate, not a verdict.',
+      'No. Only the system timezone maps one-to-one onto Claude’s reported mechanism. The other eight signals are common Chinese-environment fingerprints that correlate with it, so treat the score as an estimate, not a verdict.',
     'faq.q3': 'How do I lower my score?',
     'faq.a3':
       'Switch your OS timezone away from China zones such as Asia/Shanghai, move zh-CN off the top of your browser language list, and avoid routing Claude Code through proxies whose hostnames contain flagged domains or AI-lab keywords.',
@@ -92,6 +101,12 @@ export const ui = {
     'privacy.title': 'Privacy',
     'privacy.body':
       'Every check runs locally in your browser — your scan results never leave your device. The site only loads Google Analytics for anonymous page-view stats; none of the detected signals are ever sent.',
+
+    'social.x': 'X (Twitter)',
+    'social.xiaohongshu': 'Xiaohongshu (RED)',
+    'social.douyin': 'Douyin',
+    'social.jike': 'Jike',
+    'social.scan': 'Scan with the app, or click to open',
 
     'footer.disclaimer':
       'For reference only, based on public reverse-engineering reports. Not an official statement or advice.',
@@ -163,6 +178,15 @@ export const ui = {
     'signal.language.desc': '检查 navigator.languages;首选 zh-CN / 简体中文得分最高。',
     'signal.fonts.name': '已安装中文字体',
     'signal.fonts.desc': '用 canvas 宽度探测微软雅黑、苹方等简繁中文字体。',
+    'signal.vendorFonts.name': '国产厂商字体',
+    'signal.vendorFonts.desc':
+      '用 canvas 探测 MiSans、鸿蒙黑体、OPPO Sans、WPS 方正字体等国产厂商 / 软件字体,命中即为强信号。',
+    'signal.cnBrowser.name': '国产浏览器 / WebView',
+    'signal.cnBrowser.desc':
+      '用 UA 与 UA-CH brands 匹配微信、QQ、夸克、UC、百度等国产浏览器或应用内 WebView。',
+    'signal.deviceVendor.name': '国产品牌设备',
+    'signal.deviceVendor.desc':
+      '用 UA-CH 设备型号(navigator.userAgentData)与 UA 匹配鸿蒙、华为、小米、OPPO、vivo 等国产品牌。',
     'signal.intlLocale.name': 'Intl 区域设置',
     'signal.intlLocale.desc': '浏览器用于日期 / 数字格式化的 locale。',
     'signal.timezoneOffset.name': '时区偏移',
@@ -176,13 +200,13 @@ export const ui = {
     'result.noHits': '没有命中明显的中国信号,风险较低。',
 
     'signals.title': '检测哪些信号',
-    'signals.sub': '六项区域指纹,加权得出 0–100 风险分。',
+    'signals.sub': '九项区域指纹,加权得出 0–100 风险分。',
 
     'how.title': '检测原理',
     'how.p1':
       '当 Claude Code 通过 ANTHROPIC_BASE_URL 指向中转端点时,据公开逆向分析,它会读取操作系统时区与中转 hostname,再把结果用 Unicode 隐写术藏进 system prompt:「Today’s date」那一行的日期分隔符和 4 种几乎一样的撇号变体,编码了你是否像中国用户。',
     'how.p2':
-      '网页读不到 Claude Code 能读的全部信息,但关键信号完全一致:本工具读取同一个系统时区,再叠加浏览器语言、中文字体、Intl locale、UTC+8 偏移与 emoji 风格五项指纹,加权得分。得分 ≥0.25 计为命中;分档:低 0–30、中 31–60、高 61–100。',
+      '网页读不到 Claude Code 能读的全部信息,但关键信号完全一致:本工具读取同一个系统时区,再叠加浏览器语言、中文字体、国产厂商字体、国产浏览器、设备品牌、Intl locale、UTC+8 偏移与 emoji 风格八项指纹,加权得分。得分 ≥0.25 计为命中;分档:低 0–30、中 31–60、高 61–100。',
     'ui.weight': '权重',
 
     'faq.title': '常见问题',
@@ -191,7 +215,7 @@ export const ui = {
       '据公开逆向分析,Claude Code 连接非官方端点时会读取系统时区与中转 hostname,并把结果隐写进 system prompt。本页通过 Intl.DateTimeFormat 读到的,正是同一个系统时区。',
     'faq.q2': '这个分数就是 Claude 的真实判定吗?',
     'faq.a2':
-      '不是。只有系统时区能与 Claude 被披露的机制一一对应,其余五项是与之相关的「中文环境指纹」。分数是估计,不是定论。',
+      '不是。只有系统时区能与 Claude 被披露的机制一一对应,其余八项是与之相关的「中文环境指纹」。分数是估计,不是定论。',
     'faq.q3': '怎么降低分数?',
     'faq.a3':
       '把系统时区改出 Asia/Shanghai 等中国时区,把 zh-CN 从浏览器语言列表首位移除,并避免让 Claude Code 走 hostname 含敏感域名 / AI 实验室关键词的中转。',
@@ -202,6 +226,12 @@ export const ui = {
     'privacy.title': '隐私说明',
     'privacy.body':
       '所有检测都在你的浏览器本地完成,扫描结果不会离开你的设备。网站仅加载 Google Analytics 统计匿名页面访问量,检测到的信号不会被发送。',
+
+    'social.x': 'X(推特)',
+    'social.xiaohongshu': '小红书',
+    'social.douyin': '抖音',
+    'social.jike': '即刻',
+    'social.scan': '用 App 扫码关注,或点击直达',
 
     'footer.disclaimer': '本工具仅供参考,基于公开逆向分析,不构成任何官方结论或建议。',
     'footer.license': '基于 MIT 协议开源 —— 二次发布请保留原项目署名。',

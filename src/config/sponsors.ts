@@ -10,7 +10,7 @@ export interface Sponsor {
   id: string;
   name: string;
   /** Outbound (referral) link; the whole banner row links here. */
-  url: string;
+  url: Record<Lang, string>;
   /** Path under `public/`, e.g. `/sponsors/foo.png`. */
   logo: string;
   /** Intrinsic logo size, used to reserve space and avoid layout shift. */
@@ -28,7 +28,10 @@ export const SPONSORS: Sponsor[] = [
   {
     id: 'ergou',
     name: '二狗 API',
-    url: 'https://ergouapi.com/r/gh-fuckclaude',
+    url: {
+      zh: 'https://ergouapi.com/r/gh-fuckclaude',
+      en: 'https://ergouapi.com/r/gh-fuckclaude',
+    },
     logo: '/sponsors/ergou-wordmark-340x112.png',
     logoWidth: 340,
     logoHeight: 112,
@@ -48,7 +51,10 @@ export const SPONSORS: Sponsor[] = [
   {
     id: 'roxy',
     name: 'Roxy浏览器',
-    url: 'https://roxybrowser.com/invite/0326196A',
+    url: {
+      zh: 'https://roxybrowser.cn/invite/0326196A',
+      en: 'https://roxybrowser.com/invite/0326196A',
+    },
     logo: '/sponsors/roxy-wordmark.jpg',
     logoWidth: 500,
     logoHeight: 200,
@@ -68,7 +74,10 @@ export const SPONSORS: Sponsor[] = [
   {
     id: 'geek2api',
     name: 'Geek2API',
-    url: 'https://hk.geek2api.com?ref=fuckclaude',
+    url: {
+      zh: 'https://hk.geek2api.com?ref=fuckclaude',
+      en: 'https://hk.geek2api.com?ref=fuckclaude',
+    },
     logo: '/sponsors/geek2api-wordmark-340x108.jpg',
     logoWidth: 340,
     logoHeight: 108,
@@ -84,5 +93,28 @@ export const SPONSORS: Sponsor[] = [
       zh: '立即体验',
       en: 'Try it now',
     },
-  }
+  },
+  {
+    id: 'hanhui',
+    name: '瀚慧AI',
+    url: {
+      zh: 'https://shop.aishop.chat/',
+      en: 'https://shop.aishop.chat/',
+    },
+    logo: '/sponsors/hanhui-wordmark.png',
+    logoWidth: 328,
+    logoHeight: 104,
+    headline: {
+      zh: 'Claude / GPT / Gemini 会员充值，正规可开票。',
+      en: 'Claude / GPT / Gemini subscriptions, legit & invoiceable.',
+    },
+    tagline: {
+      zh: '海外 AI 会员订阅、续费、升级服务，稳定交付，售后跟进，企业/高校/个人更省心',
+      en: 'Overseas AI membership subscribe, renew & upgrade — reliable delivery with after-sales support for enterprises, universities & individuals',
+    },
+    cta: {
+      zh: '立即选购',
+      en: 'Shop now',
+    },
+  },
 ];

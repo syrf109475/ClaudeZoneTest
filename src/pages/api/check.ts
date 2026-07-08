@@ -9,9 +9,10 @@
  *   - `accept-language`       — browser/UA language preferences
  *   - `user-agent`            — OS/vendor guess for the emoji signal
  *
- * Fonts + Intl locale are browser-only, so the score is computed over the
- * measurable weight (70/100) and normalised to 0–100. It reuses the exact same
- * pure scorers as the client so results stay consistent.
+ * Fonts (Chinese + vendor faces) and Intl locale are browser-only, so the
+ * score is computed over the measurable weight (68/100) and normalised to
+ * 0–100. It reuses the exact same pure scorers as the client so results stay
+ * consistent.
  *
  * Response format:
  *   - default (curl, browser, …)                      → pretty plain-text report
@@ -30,6 +31,8 @@ import {
   scoreTimezone,
   scoreLanguages,
   scoreEmojiVendor,
+  scoreCnBrowser,
+  scoreCnDevice,
   type RiskBand,
   type SignalId,
 } from '../../config/signals';
@@ -140,10 +143,14 @@ function analyze(req: Request, lang: Lang): Analysis {
 
   const offsetEast = tzOffsetEastMinutes(tz);
   const emoji = scoreEmojiVendor(ua);
+  const cnBrowser = scoreCnBrowser(ua);
+  const cnDevice = scoreCnDevice(ua);
 
   const measured: Partial<Record<SignalId, { value: string; score: number }>> = {
     timezone: { value: tz || 'unknown', score: scoreTimezone(tz) },
     language: { value: acceptLang.join(', ') || 'unknown', score: scoreLanguages(acceptLang) },
+    cnBrowser: { value: cnBrowser.name ?? 'none detected', score: cnBrowser.score },
+    deviceVendor: { value: cnDevice.name ?? 'none detected', score: cnDevice.score },
     timezoneOffset: { value: fmtOffset(offsetEast), score: offsetEast === 480 ? 0.7 : 0 },
     emoji: { value: `${emoji.vendor} style`, score: emoji.score },
   };
@@ -208,8 +215,8 @@ function jsonBody(a: Analysis, lang: Lang) {
     signals: a.signals,
     note:
       lang === 'zh'
-        ? '基于 IP 归属地与请求头的服务端估算,与浏览器端读取操作系统的检测结果可能不同;中文字体与 Intl locale 只能在浏览器里检测。'
-        : 'Server-side estimate from IP geo + request headers; it can differ from the in-browser OS scan. Chinese fonts and Intl locale can only be measured in a browser.',
+        ? '基于 IP 归属地与请求头的服务端估算,与浏览器端读取操作系统的检测结果可能不同;中文字体、厂商字体与 Intl locale 只能在浏览器里检测。'
+        : 'Server-side estimate from IP geo + request headers; it can differ from the in-browser OS scan. Chinese fonts, vendor fonts and Intl locale can only be measured in a browser.',
     docs: lang === 'zh' ? `${SITE}/zh/` : `${SITE}/`,
   };
 }

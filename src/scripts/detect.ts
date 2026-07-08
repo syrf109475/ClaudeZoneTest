@@ -394,7 +394,7 @@ async function run() {
 
     let outcome;
     try {
-      outcome = signal.detect();
+      outcome = await signal.detect();
     } catch {
       outcome = { raw: '—', score: 0 };
     }

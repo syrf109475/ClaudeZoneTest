@@ -6,6 +6,7 @@ import ScoreRing from './ScoreRing.astro';
 import Mascot from './Mascot.astro';
 import Sponsors from './Sponsors.astro';
 import CnModels from './CnModels.astro';
+import SocialLinks from './SocialLinks.astro';
 import Footer from './Footer.astro';
 
 interface Props {
@@ -41,6 +42,7 @@ const apiExamples = [
     </a>
     <nav class="nav__actions">
       <LangToggle lang={lang} />
+      <SocialLinks lang={lang} />
       <a
         class="icon-link"
         href="https://github.com/LinXiaoTao/FuckClaude"
@@ -247,6 +249,12 @@ const apiExamples = [
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+  /* Logo-only brand on small screens — the icon row needs the width. */
+  @media (max-width: 560px) {
+    .brand__text {
+      display: none;
+    }
   }
 
   .api-cmd {
